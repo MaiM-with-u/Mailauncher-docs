@@ -38,10 +38,38 @@ jobs:
           echo "❌ index.html 不存在"
           exit 1
         fi
+        
         echo "✅ 构建产物验证通过"
         echo "📊 构建产物大小: $(du -sh docs/.vitepress/dist | cut -f1)"
+        
+        # 检查 assets 目录
+        echo "🎨 Assets 文件检查:"
+        if [ -d "docs/.vitepress/dist/assets" ]; then
+          echo "   ✅ assets 目录存在"
+          echo "   📁 assets 文件总数: $(find docs/.vitepress/dist/assets -type f | wc -l)"
+          echo "   🔤 字体文件数量: $(find docs/.vitepress/dist/assets -name "*.woff*" | wc -l)"
+        else
+          echo "   ❌ assets 目录不存在，这将导致404错误！"
+          exit 1
+        fi
 
     # 仅在推送到 main 分支时才部署
+    - name: 清理服务器目录
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USERNAME }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        port: ${{ secrets.SERVER_PORT || 22 }}
+        script: |
+          DEPLOY_PATH="${{ secrets.SERVER_DEPLOY_PATH }}"
+          echo "🧹 清理部署目录: $DEPLOY_PATH"
+          mkdir -p "$DEPLOY_PATH"
+          find "$DEPLOY_PATH" -type f -delete 2>/dev/null || true
+          find "$DEPLOY_PATH" -type d -empty -delete 2>/dev/null || true
+          echo "✅ 目录清理完成"
+
     - name: 部署到服务器
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       uses: appleboy/scp-action@v0.1.7
@@ -50,11 +78,13 @@ jobs:
         username: ${{ secrets.SERVER_USERNAME }}
         key: ${{ secrets.SERVER_SSH_KEY }}
         port: ${{ secrets.SERVER_PORT || 22 }}
-        source: "./docs/.vitepress/dist/*"
+        source: "docs/.vitepress/dist/*"
         target: "${{ secrets.SERVER_DEPLOY_PATH }}"
-        strip_components: 4
+        strip_components: 0
         overwrite: true
         timeout: 120s
+        debug: true
+        rm: true
 
     - name: 验证部署结果
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -80,7 +110,23 @@ jobs:
             exit 1
           fi
           
-          echo "✅ 部署验证成功!"
+          echo "✅ 核心文件验证成功!"
           echo "📂 部署目录: $DEPLOY_PATH"
           echo "📄 文件数量: $(find "$DEPLOY_PATH" -type f | wc -l)"
+          
+          # 重点检查 assets 目录
+          echo "🎨 ASSETS 目录检查:"
+          if [ -d "$DEPLOY_PATH/assets" ]; then
+            echo "✅ assets 目录存在"
+            echo "   📄 assets 文件总数: $(find "$DEPLOY_PATH/assets" -type f | wc -l)"
+            echo "   🔤 字体文件: $(find "$DEPLOY_PATH/assets" -name "*.woff*" | wc -l) 个"
+            echo "   📋 前5个文件:"
+            find "$DEPLOY_PATH/assets" -type f | head -5
+          else
+            echo "❌ assets 目录不存在！这是导致404错误的原因！"
+            echo "📂 部署目录内容:"
+            ls -la "$DEPLOY_PATH"
+            exit 1
+          fi
+          
           echo "🌐 网站应该可以在 http://${{ secrets.SERVER_HOST }}/ 访问"

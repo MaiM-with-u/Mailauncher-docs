@@ -4,8 +4,8 @@ export default defineConfig({
   title: 'MaiLauncher 文档',
   description: 'MaiLauncher 启动器的官方文档',
   
-  // 基础路径配置 - 使用相对路径避免404错误
-  base: './',
+  // 基础路径配置 - 设置为根路径
+  base: '/',
   
   // 主题配置
   themeConfig: {
