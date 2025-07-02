@@ -1,0 +1,27 @@
+{
+  "name": "mailauncher-docs",
+  "version": "1.0.0",
+  "description": "存放启动器文档仓库",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vitepress dev docs",
+    "build": "vitepress build docs",
+    "preview": "vitepress preview docs",
+    "serve": "vitepress serve docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MaiM-with-u/Mailauncher-docs.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/MaiM-with-u/Mailauncher-docs/issues"
+  },
+  "homepage": "https://github.com/MaiM-with-u/Mailauncher-docs#readme",
+  "devDependencies": {
+    "vitepress": "^1.6.3"
+  }
+}
