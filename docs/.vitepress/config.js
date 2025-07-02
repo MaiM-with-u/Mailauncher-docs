@@ -4,6 +4,9 @@ export default defineConfig({
   title: 'MaiLauncher 文档',
   description: 'MaiLauncher 启动器的官方文档',
   
+  // 基础路径配置 - 使用相对路径避免404错误
+  base: './',
+  
   // 主题配置
   themeConfig: {
     // 导航栏
@@ -100,7 +103,8 @@ export default defineConfig({
   // 头部配置
   head: [
     ['link', { rel: 'icon', href: '/favicon.ico' }],
-    ['meta', { name: 'theme-color', content: '#3c82f6' }]
+    ['meta', { name: 'theme-color', content: '#3c82f6' }],
+    ['meta', { name: 'viewport', content: 'width=device-width, initial-scale=1.0' }]
   ],
 
   // 清理 URL
