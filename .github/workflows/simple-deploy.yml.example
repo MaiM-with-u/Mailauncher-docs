@@ -1,0 +1,30 @@
+name: 简化部署工作流
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - run: npm ci
+    - run: npm run build
+    
+    - name: 部署到服务器
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USERNAME }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        source: "docs/.vitepress/dist/*"
+        target: ${{ secrets.SERVER_TARGET_PATH }}
+        strip_components: 3

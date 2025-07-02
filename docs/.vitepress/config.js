@@ -35,7 +35,14 @@ export default defineConfig({
             { text: '开发概述', link: '/dev/' },
             { text: '项目结构', link: '/dev/structure' },
             { text: '构建部署', link: '/dev/build' },
-            { text: '贡献指南', link: '/dev/contributing' }
+            { text: '贡献指南', link: '/dev/contributing' },
+            { text: 'GitHub Actions', link: '/dev/github-actions' }
+          ]
+        },
+        {
+          text: '前端开发',
+          items: [
+            { text: 'send_message 实现', link: '/dev/frontend-sendmessage' }
           ]
         }
       ],

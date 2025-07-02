@@ -1,0 +1,109 @@
+name: 自动构建和部署文档
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        # 启用子模块支持（如果文档包含子模块）
+        submodules: recursive
+
+    - name: 设置 Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'  # 推荐使用 LTS 版本
+        cache: 'npm'
+        cache-dependency-path: '**/package-lock.json'
+
+    - name: 安装依赖
+      run: |
+        npm ci --prefer-offline --registry=https://registry.npmmirror.com
+        # 如果使用 PNPM
+        # npm install -g pnpm
+        # pnpm install --frozen-lockfile
+
+    - name: 构建项目
+      run: npm run docs:build  # 确保与 package.json 中的脚本名称一致
+      env:
+        NODE_OPTIONS: --max_old_space_size=4096  # 增加内存限制
+
+    - name: 检查构建产物
+      run: |
+        ls -la docs/.vitepress/dist
+        [ -f docs/.vitepress/dist/index.html ] || exit 1
+
+    - name: 验证部署配置
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: |
+        # 验证必需的 secrets 是否存在
+        if [ -z "${{ secrets.SERVER_HOST }}" ]; then
+          echo "❌ SERVER_HOST secret 未配置"
+          exit 1
+        fi
+        if [ -z "${{ secrets.SERVER_USERNAME }}" ]; then
+          echo "❌ SERVER_USERNAME secret 未配置"
+          exit 1
+        fi
+        if [ -z "${{ secrets.SERVER_SSH_KEY }}" ]; then
+          echo "❌ SERVER_SSH_KEY secret 未配置"
+          exit 1
+        fi
+        if [ -z "${{ secrets.SERVER_DEPLOY_PATH }}" ]; then
+          echo "❌ SERVER_DEPLOY_PATH secret 未配置"
+          exit 1
+        fi
+        echo "✅ 所有必需的 secrets 都已配置"
+
+    # 仅在推送到 main 分支时才部署
+    - name: 部署到服务器
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USERNAME }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        port: ${{ secrets.SERVER_PORT || 22 }}
+        source: "docs/.vitepress/dist/*"
+        target: ${{ secrets.SERVER_DEPLOY_PATH }}
+        # 重要：正确设置 strip_components
+        strip_components: 4  # 根据实际路径深度调整
+        rm: true  # 上传前删除目标目录内容
+        overwrite: true
+
+    - name: 执行服务器后续命令
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USERNAME }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        port: ${{ secrets.SERVER_PORT || 22 }}
+        script: |
+          # 设置正确的文件权限
+          sudo chown -R www:www ${{ secrets.SERVER_DEPLOY_PATH }}
+          sudo find ${{ secrets.SERVER_DEPLOY_PATH }} -type d -exec chmod 755 {} \;
+          sudo find ${{ secrets.SERVER_DEPLOY_PATH }} -type f -exec chmod 644 {} \;
+          
+          # 清除 Nginx 缓存（如果启用）
+          if [ -d "/var/cache/nginx" ]; then
+            sudo rm -rf /var/cache/nginx/*
+          fi
+          
+          # 验证部署
+          echo "部署完成，访问地址："
+          echo "http://${{ secrets.SERVER_HOST }}/"
+          
+          # 发送成功通知（可选）
+          curl -s -X POST ${{ secrets.NOTIFICATION_WEBHOOK }} \
+            -H "Content-Type: application/json" \
+            -d '{"text":"文档部署成功: ${{ github.repository }}@${{ github.sha }}"}'

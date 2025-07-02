@@ -291,4 +291,6 @@ graph TB
 - [项目结构](./structure.md) - 详细的项目结构说明
 - [构建部署](./build.md) - 构建和部署指南
 - [贡献指南](./contributing.md) - 详细的贡献指南
+- [前端 send_message 实现](./frontend-sendmessage.md) - 聊天功能开发文档
+- [GitHub Actions 部署](./github-actions.md) - 自动化部署配置
 - [API 参考](../api/) - API 文档
