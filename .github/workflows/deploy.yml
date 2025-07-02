@@ -54,7 +54,7 @@ jobs:
         fi
 
     # 仅在推送到 main 分支时才部署
-    - name: 清理服务器目录
+    - name: 清理服务器目录并安装 rsync
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       uses: appleboy/ssh-action@v1.0.3
       with:
@@ -63,6 +63,27 @@ jobs:
         key: ${{ secrets.SERVER_SSH_KEY }}
         port: ${{ secrets.SERVER_PORT || 22 }}
         script: |
+          # 安装 rsync
+          echo "📦 检查并安装 rsync..."
+          if ! command -v rsync &> /dev/null; then
+            echo "rsync 未安装，正在安装..."
+            if command -v apt-get &> /dev/null; then
+              sudo apt-get update && sudo apt-get install -y rsync
+            elif command -v yum &> /dev/null; then
+              sudo yum install -y rsync
+            elif command -v dnf &> /dev/null; then
+              sudo dnf install -y rsync
+            elif command -v apk &> /dev/null; then
+              sudo apk add rsync
+            else
+              echo "❌ 无法确定包管理器，请手动安装 rsync"
+              exit 1
+            fi
+          else
+            echo "✅ rsync 已安装"
+          fi
+          
+          # 清理部署目录
           DEPLOY_PATH="${{ secrets.SERVER_DEPLOY_PATH }}"
           echo "🧹 清理部署目录: $DEPLOY_PATH"
           mkdir -p "$DEPLOY_PATH"
