@@ -95,7 +95,7 @@ jobs:
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       uses: burnett01/rsync-deployments@7.0.1
       with:
-        switches: -avzr --delete
+        switches: -avzr --delete --exclude='.user.ini'
         path: docs/.vitepress/dist/
         remote_path: ${{ secrets.SERVER_DEPLOY_PATH }}
         remote_host: ${{ secrets.SERVER_HOST }}
