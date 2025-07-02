@@ -50,9 +50,9 @@ jobs:
         username: ${{ secrets.SERVER_USERNAME }}
         key: ${{ secrets.SERVER_SSH_KEY }}
         port: ${{ secrets.SERVER_PORT || 22 }}
-        source: "./docs/.vitepress/dist/"
+        source: "./docs/.vitepress/dist/*"
         target: "${{ secrets.SERVER_DEPLOY_PATH }}"
-        strip_components: 3
+        strip_components: 4
         overwrite: true
         timeout: 120s
 
