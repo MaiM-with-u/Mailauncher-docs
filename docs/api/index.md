@@ -1,10 +1,10 @@
-# API 文档
+# MaiLauncher API 参考文档
 
 MaiLauncher 后端提供了完整的 RESTful API 和 WebSocket 接口，用于管理 MaiBot 实例和系统资源。
 
 ## 📋 概述
 
-MaiLauncher API 提供了全面的接口来管理 MaiBot 实例、部署管理、系统监控和资源管理。
+MaiLauncher API 提供了全面的接口来管理 MaiBot 实例、部署管理、系统监控和资源管理。本文档描述了所有已实现的 API 端点及其使用方法。
 
 ### 基础信息
 
@@ -18,13 +18,17 @@ MaiLauncher API 提供了全面的接口来管理 MaiBot 实例、部署管理�
 所有 API 端点都遵循 RESTful 设计原则：
 
 ```
-GET    /api/v1/instances          # 获取实例列表
-POST   /api/v1/instance/{id}/start # 启动实例
-GET    /api/v1/system/health      # 系统健康检查
-WS     /api/v1/ws/{session_id}    # WebSocket 连接
-POST   /api/v1/resource     # 创建新资源
-PUT    /api/v1/resource/:id # 更新特定资源
-DELETE /api/v1/resource/:id # 删除特定资源
+GET    /api/v1/instances               # 获取实例列表
+GET    /api/v1/instances/stats         # 获取实例统计
+GET    /api/v1/instance/{id}/start     # 启动实例
+GET    /api/v1/instance/{id}/stop      # 停止实例
+GET    /api/v1/instance/{id}/restart   # 重启实例
+DELETE /api/v1/instance/{id}/delete    # 删除实例
+GET    /api/v1/system/health           # 系统健康检查
+GET    /api/v1/system/metrics          # 系统性能指标
+POST   /api/v1/deploy/deploy           # 部署新实例
+POST   /api/v1/instances/add           # 添加现有实例
+WS     /ws/{session_id}                # WebSocket 连接
 ```
 
 ### 响应格式
@@ -35,8 +39,7 @@ DELETE /api/v1/resource/:id # 删除特定资源
 {
   "success": true,
   "data": {},
-  "message": "操作成功",
-  "timestamp": "2025-07-02T10:30:00Z"
+  "message": "操作成功"
 }
 ```
 
@@ -49,138 +52,152 @@ DELETE /api/v1/resource/:id # 删除特定资源
     "code": "ERROR_CODE",
     "message": "错误描述",
     "details": {}
-  },
-  "timestamp": "2025-07-02T10:30:00Z"
+  }
 }
 ```
+
+## 📖 文档导航
+
+- **[API 参考文档](#-api-参考文档)**（本页）- 已实现的所有 API 端点
+- **[API 开发指南](./development.md)** - 如何开发新的 API 和前端调用方法
 
 ## 主要 API 模块
 
-### 1. 启动器 API
-管理游戏启动、进程监控等核心功能。
-
-**相关端点：**
-- `GET /api/v1/launcher/status` - 获取启动器状态
-- `POST /api/v1/launcher/start` - 启动游戏
-- `POST /api/v1/launcher/stop` - 停止游戏
-
-### 2. 实例管理 API
-管理游戏实例的创建、配置和删除。
+### 🤖 实例管理 API
+管理 MaiBot 实例的创建、启动、停止和删除。
 
 **相关端点：**
 - `GET /api/v1/instances` - 获取实例列表
-- `POST /api/v1/instances` - 创建新实例
-- `PUT /api/v1/instances/:id` - 更新实例配置
-- `DELETE /api/v1/instances/:id` - 删除实例
+- `GET /api/v1/instances/stats` - 获取实例统计
+- `GET /api/v1/instance/{id}/start` - 启动实例
+- `GET /api/v1/instance/{id}/stop` - 停止实例
+- `GET /api/v1/instance/{id}/restart` - 重启实例
+- `DELETE /api/v1/instance/{id}/delete` - 删除实例
+- `GET /api/v1/start/{id}/napcat` - 启动 NapCat 服务
+- `GET /api/v1/start/{id}/nonebot` - 启动 NoneBot-ada 服务
 
-### 3. 配置 API
-管理应用配置和游戏设置。
+### 🚀 部署管理 API
+管理实例的部署和添加。
 
 **相关端点：**
-- `GET /api/v1/config` - 获取配置
-- `PUT /api/v1/config` - 更新配置
-- `POST /api/v1/config/reset` - 重置配置
+- `GET /api/v1/deploy/versions` - 获取可用版本
+- `GET /api/v1/deploy/services` - 获取可部署服务列表
+- `POST /api/v1/deploy/deploy` - 部署新实例
+- `POST /api/v1/instances/add` - 添加现有实例
+- `GET /api/v1/install-status/{instanceId}` - 检查安装状态
 
-### 4. WebSocket API
-提供实时通信能力，用于状态更新、日志推送等。
+### 📊 系统监控 API
+监控系统状态和性能指标。
+
+**相关端点：**
+- `GET /api/v1/system/health` - 系统健康检查
+- `GET /api/v1/system/metrics` - 系统性能指标
+
+### 🎨 资源管理 API
+管理 MaiBot 实例的数据资源，包括表情包和用户信息。
+
+**相关端点：**
+- `POST /api/v1/resource/{instance_id}/emoji` - 创建表情包
+- `GET /api/v1/resource/{instance_id}/emoji/{emoji_id}` - 获取表情包
+- `POST /api/v1/resource/{instance_id}/emoji/search` - 搜索表情包
+- `POST /api/v1/resource/{instance_id}/person` - 创建用户信息
+- `GET /api/v1/resource/{instance_id}/person/{person_id}` - 获取用户信息
+
+### ⚙️ 配置管理 API
+管理实例配置文件和环境变量。
+
+**相关端点：**
+- `GET /api/v1/resources/{instance_id}/config/get` - 获取 Bot 配置
+- `POST /api/v1/resources/{instance_id}/config/update` - 更新 Bot 配置
+- `GET /api/v1/resources/{instance_id}/lpmm/get` - 获取 LPMM 配置
+- `POST /api/v1/resources/{instance_id}/lpmm/update` - 更新 LPMM 配置
+- `GET /api/v1/resources/{instance_id}/env/get` - 获取环境变量
+- `POST /api/v1/resources/{instance_id}/env/update` - 更新环境变量
+
+### 🔌 WebSocket API
+提供实时终端交互能力。
 
 **连接地址：**
-- `ws://localhost:8888/ws`
+- `ws://localhost:23456/ws/{session_id}`
 
 ## 快速开始
 
-### 获取启动器状态
+### 获取实例列表
 
 ```bash
-curl -X GET http://localhost:8888/api/v1/launcher/status
+curl -X GET http://localhost:23456/api/v1/instances
 ```
 
-响应示例：
+**响应示例**:
 ```json
 {
-  "success": true,
-  "data": {
-    "status": "idle",
-    "version": "1.0.0",
-    "uptime": 3600,
-    "instances": 2
-  },
-  "message": "获取状态成功",
-  "timestamp": "2025-07-02T10:30:00Z"
+  "instances": [
+    {
+      "id": "a2fe529b51999fc2d45df5196c6c50a46a608fa1",
+      "name": "maibot-stable-1",
+      "status": "running",
+      "installedAt": "1747404418536",
+      "path": "D:\\MaiBot\\MaiBot-1",
+      "port": 8000,
+      "version": "0.6.3",
+      "services": [
+        {
+          "name": "napcat",
+          "status": "running",
+          "port": 8095
+        }
+      ]
+    }
+  ],
+  "success": true
 }
 ```
 
-### 创建游戏实例
+### 启动实例
 
 ```bash
-curl -X POST http://localhost:8888/api/v1/instances \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "我的游戏实例",
-    "game_path": "C:/MaiDX/",
-    "config": {
-      "resolution": "1920x1080",
-      "fullscreen": true
-    }
-  }'
+curl -X GET http://localhost:23456/api/v1/instance/{instance_id}/start
 ```
 
-### WebSocket 连接示例
+### WebSocket 连接
 
 ```javascript
-const ws = new WebSocket('ws://localhost:8888/ws');
-
-ws.onopen = function() {
-    console.log('WebSocket 连接已建立');
-};
+const ws = new WebSocket('ws://localhost:23456/ws/abc123_main');
 
 ws.onmessage = function(event) {
-    const data = JSON.parse(event.data);
-    console.log('收到消息:', data);
+    const message = JSON.parse(event.data);
+    console.log('终端输出:', message.data);
 };
 
-ws.onerror = function(error) {
-    console.error('WebSocket 错误:', error);
-};
+// 发送命令
+ws.send(JSON.stringify({
+    type: 'input',
+    data: 'echo "Hello World"\n'
+}));
 ```
 
-## 错误处理
+## ❌ 错误处理
 
 ### 常见错误码
 
-| 错误码 | 描述 | 解决方案 |
-|--------|------|----------|
-| `INSTANCE_NOT_FOUND` | 实例不存在 | 检查实例 ID 是否正确 |
-| `GAME_ALREADY_RUNNING` | 游戏已在运行 | 先停止当前游戏实例 |
-| `INVALID_CONFIG` | 配置无效 | 检查配置格式和必需字段 |
-| `PERMISSION_DENIED` | 权限不足 | 以管理员身份运行启动器 |
-| `FILE_NOT_FOUND` | 文件未找到 | 检查游戏路径是否正确 |
+| 错误码 | 描述 | HTTP状态码 |
+|--------|------|-----------|
+| `INSTANCE_NOT_FOUND` | 实例不存在 | 404 |
+| `INSTANCE_ALREADY_RUNNING` | 实例已在运行 | 400 |
+| `INVALID_CONFIG` | 配置无效 | 400 |
+| `PERMISSION_DENIED` | 权限不足 | 403 |
+| `FILE_NOT_FOUND` | 文件未找到 | 404 |
+| `SERVICE_START_FAILED` | 服务启动失败 | 500 |
 
-### 错误处理最佳实践
+### 错误响应格式
 
-1. **总是检查响应状态**：
-```javascript
-if (response.success) {
-    // 处理成功响应
-    console.log(response.data);
-} else {
-    // 处理错误
-    console.error(response.error.message);
-}
-```
-
-2. **实现重试机制**：
-```javascript
-async function apiCallWithRetry(url, options, maxRetries = 3) {
-    for (let i = 0; i < maxRetries; i++) {
-        try {
-            const response = await fetch(url, options);
-            return await response.json();
-        } catch (error) {
-            if (i === maxRetries - 1) throw error;
-            await new Promise(resolve => setTimeout(resolve, 1000 * i));
-        }
-    }
+```json
+{
+  "success": false,
+  "error": {
+    "code": "INSTANCE_NOT_FOUND",
+    "message": "指定的实例不存在"
+  }
 }
 ```
 
@@ -188,52 +205,58 @@ async function apiCallWithRetry(url, options, maxRetries = 3) {
 
 更多详细信息请查看各个模块的专门文档：
 
-- [启动器 API](./launcher.md) - 游戏启动和进程管理
-- [WebSocket API](./websocket.md) - 实时通信接口
-- [配置 API](./config.md) - 配置管理接口
+- [API 开发指南](./development.md) - 后端API开发和前端调用指南
+- [实例管理 API](./instances.md) - 实例创建、启动、停止管理
+- [部署 API](./deploy.md) - 实例部署和安装管理
+- [资源管理 API](./resources.md) - 表情包和用户信息管理
+- [配置管理 API](./config.md) - 配置文件和环境变量管理
+- [WebSocket API](./websocket.md) - 实时终端通信接口
 
-## SDK 和工具
+## 🚀 快速调用示例
 
-### JavaScript SDK
+### JavaScript
 
-我们提供了 JavaScript SDK 来简化 API 调用：
-
-```bash
-npm install mailauncher-sdk
-```
-
-使用示例：
 ```javascript
-import { MaiLauncherClient } from 'mailauncher-sdk';
-
-const client = new MaiLauncherClient('http://localhost:8888');
-
 // 获取实例列表
-const instances = await client.instances.list();
+const response = await fetch('http://localhost:23456/api/v1/instances');
+const data = await response.json();
 
-// 启动游戏
-await client.launcher.start(instanceId);
+// 启动实例
+const result = await fetch('http://localhost:23456/api/v1/instance/abc123/start');
 ```
 
-### Postman 集合
+### Python
 
-我们提供了 Postman 集合文件，包含所有 API 端点的示例请求：
+```python
+import requests
 
-[下载 Postman 集合](./mailauncher-api.postman_collection.json)
+# 获取实例列表
+response = requests.get('http://localhost:23456/api/v1/instances')
+data = response.json()
 
-## 更新日志
+# 启动实例
+result = requests.get('http://localhost:23456/api/v1/instance/abc123/start')
+```
 
-### v1.0.0
-- 初始 API 版本
-- 基础启动器功能
-- 实例管理
-- WebSocket 支持
+## 🌟 API 版本信息
 
-### 即将推出
-- API 认证机制
-- 更多实例配置选项
-- 插件 API 支持
-- 批量操作接口
+### 当前版本: v1.0.0
+
+**已实现功能：**
+- ✅ 完整的实例管理 API
+- ✅ 部署和安装管理
+- ✅ 资源管理（表情包、用户信息）
+- ✅ 配置管理（Bot配置、LPMM配置、环境变量）
+- ✅ WebSocket 终端交互支持
+- ✅ 系统监控和健康检查
+
+**计划功能：**
+- 🔄 API 认证机制
+- 🔄 更多实例配置选项
+- 🔄 插件 API 支持
+## � 完整 API 参考
+
+以下是所有已实现的 API 端点的详细说明：
 
 ## 🤖 实例管理 API
 
@@ -242,7 +265,7 @@ await client.launcher.start(instanceId);
 获取所有 MaiBot 实例的列表及其状态信息。
 
 ```http
-GET /instances
+GET /api/v1/instances
 ```
 
 **响应示例**:
@@ -263,6 +286,12 @@ GET /instances
           "path": "D:\\MaiBot\\MaiBot-1\\napcat",
           "status": "running",
           "port": 8095
+        },
+        {
+          "name": "nonebot-ada",
+          "path": "D:\\MaiBot\\MaiBot-1\\nonebot-ada",
+          "status": "stopped",
+          "port": 18002
         }
       ]
     }
@@ -274,7 +303,7 @@ GET /instances
 ### 获取实例统计
 
 ```http
-GET /instances/stats
+GET /api/v1/instances/stats
 ```
 
 **响应示例**:
@@ -282,33 +311,52 @@ GET /instances/stats
 {
   "total": 3,
   "running": 2,
-  "stopped": 1,
-  "success": true
+  "stopped": 1
 }
 ```
 
 ### 启动实例
 
 ```http
-POST /instance/{id}/start
+GET /api/v1/instance/{id}/start
+```
+
+**响应示例**:
+```json
+{
+  "success": true,
+  "message": "实例 maibot-stable-1 已启动"
+}
 ```
 
 ### 停止实例
 
 ```http
-POST /instance/{id}/stop
+GET /api/v1/instance/{id}/stop
 ```
 
 ### 重启实例
 
 ```http
-POST /instance/{id}/restart
+GET /api/v1/instance/{id}/restart
 ```
 
 ### 删除实例
 
 ```http
-DELETE /instance/{id}
+DELETE /api/v1/instance/{id}/delete
+```
+
+### 启动服务
+
+启动 NapCat 服务：
+```http
+GET /api/v1/start/{id}/napcat
+```
+
+启动 NoneBot-ada 服务：
+```http
+GET /api/v1/start/{id}/nonebot
 ```
 
 ## 🚀 部署管理 API
@@ -316,24 +364,110 @@ DELETE /instance/{id}
 ### 获取可用版本
 
 ```http
-GET /deploy/versions
+GET /api/v1/deploy/versions
+```
+
+**响应示例**:
+```json
+{
+  "versions": ["latest", "main", "v0.6.3", "v0.6.2", "v0.6.1"]
+}
+```
+
+### 获取可部署服务
+
+```http
+GET /api/v1/deploy/services
+```
+
+**响应示例**:
+```json
+{
+  "services": [
+    {
+      "name": "napcat",
+      "description": "NapCat 服务"
+    },
+    {
+      "name": "nonebot-ada",
+      "description": "NoneBot-ada 服务"
+    },
+    {
+      "name": "nonebot",
+      "description": "NoneBot 服务"
+    }
+  ]
+}
 ```
 
 ### 部署实例
 
 ```http
-POST /deploy/deploy
+POST /api/v1/deploy/deploy
 ```
 
 **请求体**:
 ```json
 {
-  "version": "v0.6.3",
-  "instanceName": "my-bot-instance",
-  "configuration": {
-    "enableNapCat": true,
-    "enableNoneBotAda": false
-  }
+  "instance_name": "maibot-instance-1",
+  "install_services": [
+    {
+      "name": "napcat",
+      "path": "D:\\MaiBot\\MaiBot-1\\napcat",
+      "port": 8095,
+      "run_cmd": "python main.py"
+    }
+  ],
+  "install_path": "D:\\MaiBot\\MaiBot-1",
+  "port": 8000,
+  "version": "latest"
+}
+```
+
+### 添加现有实例
+
+```http
+POST /api/v1/instances/add
+```
+
+**请求体**:
+```json
+{
+  "instance_name": "maibot-existing-1",
+  "install_services": [
+    {
+      "name": "napcat",
+      "path": "D:\\MaiBot\\MaiBot-existing\\napcat",
+      "port": 8095,
+      "run_cmd": "python main.py"
+    }
+  ],
+  "install_path": "D:\\MaiBot\\MaiBot-existing",
+  "port": 8000,
+  "version": "0.6.3"
+}
+```
+
+### 检查安装状态
+
+```http
+GET /api/v1/install-status/{instanceId}
+```
+
+**响应示例**:
+```json
+{
+  "status": "installing",
+  "progress": 50,
+  "message": "正在安装依赖...",
+  "services_install_status": [
+    {
+      "name": "napcat",
+      "status": "installing",
+      "progress": 50,
+      "message": "正在安装 NapCat"
+    }
+  ]
 }
 ```
 
@@ -342,30 +476,50 @@ POST /deploy/deploy
 ### 系统健康检查
 
 ```http
-GET /system/health
-```
-
-### 系统指标
-
-```http
-GET /system/metrics
+GET /api/v1/system/health
 ```
 
 **响应示例**:
 ```json
 {
-  "cpu": {
-    "usage": 25.5,
-    "cores": 8
-  },
-  "memory": {
-    "used": 4096,
-    "total": 16384,
-    "usage": 25.0
-  },
-  "instances": {
-    "total": 3,
-    "running": 2
+  "status": "success",
+  "time": "2023-10-15T12:00:00Z"
+}
+```
+
+### 系统指标
+
+```http
+GET /api/v1/system/metrics
+```
+
+**响应示例**:
+```json
+{
+  "status": "success",
+  "data": {
+    "system_info": {
+      "system": "Windows",
+      "release": "11",
+      "version": "10.0.26100",
+      "machine": "AMD64",
+      "processor": "Intel(R) Core(TM) i9-14900HX"
+    },
+    "python_version": "3.12.4",
+    "cpu_usage_percent": 18.8,
+    "memory_usage": {
+      "total_mb": 32386.52,
+      "available_mb": 10222.87,
+      "percent": 68.4,
+      "used_mb": 22163.65,
+      "free_mb": 10222.87
+    },
+    "disk_usage_root": {
+      "total_gb": 726.17,
+      "used_gb": 506.15,
+      "free_gb": 220.02,
+      "percent": 69.7
+    }
   }
 }
 ```
@@ -374,17 +528,51 @@ GET /system/metrics
 
 ### 表情包管理
 
+**创建表情包**:
 ```http
-GET /maibot/{instanceId}/resources/emojis
-POST /maibot/{instanceId}/resources/emojis
-DELETE /maibot/{instanceId}/resources/emojis/{emojiId}
+POST /api/v1/resource/{instance_id}/emoji
+```
+
+**获取表情包**:
+```http
+GET /api/v1/resource/{instance_id}/emoji/{emoji_id}
+```
+
+**搜索表情包**:
+```http
+POST /api/v1/resource/{instance_id}/emoji/search
+```
+
+**更新表情包**:
+```http
+PUT /api/v1/resource/{instance_id}/emoji/{emoji_id}
+```
+
+**删除表情包**:
+```http
+DELETE /api/v1/resource/{instance_id}/emoji/{emoji_id}
 ```
 
 ### 用户信息管理
 
+**创建用户信息**:
 ```http
-GET /maibot/{instanceId}/resources/users
-GET /maibot/{instanceId}/resources/users/{userId}
+POST /api/v1/resource/{instance_id}/person
+```
+
+**获取用户信息**:
+```http
+GET /api/v1/resource/{instance_id}/person/{person_id}
+```
+
+**搜索用户信息**:
+```http
+POST /api/v1/resource/{instance_id}/person/search
+```
+
+**更新用户信息**:
+```http
+PUT /api/v1/resource/{instance_id}/person/{person_id}
 ```
 
 ## ⚙️ 配置管理 API
@@ -392,45 +580,50 @@ GET /maibot/{instanceId}/resources/users/{userId}
 ### Bot 配置
 
 ```http
-GET /maibot/{instanceId}/config/bot
-PUT /maibot/{instanceId}/config/bot
+GET /api/v1/resources/{instance_id}/config/get
+POST /api/v1/resources/{instance_id}/config/update
+```
+
+### LPMM 配置
+
+```http
+GET /api/v1/resources/{instance_id}/lpmm/get
+POST /api/v1/resources/{instance_id}/lpmm/update
 ```
 
 ### 环境变量管理
 
 ```http
-GET /maibot/{instanceId}/config/env
-PUT /maibot/{instanceId}/config/env
+GET /api/v1/resources/{instance_id}/env/get
+POST /api/v1/resources/{instance_id}/env/update
 ```
 
 ## 🔌 WebSocket 接口
 
-### 通用 WebSocket
+### 连接地址
 
 ```
-ws://localhost:23456/api/v1/ws/{sessionId}
+ws://localhost:23456/ws/{session_id}
 ```
 
-### 部署日志 WebSocket
+其中 `session_id` 格式为：`{instance_id}_{type}`
+- `type` 可选值：`main`, `napcat`, `nonebot`
 
-```
-ws://localhost:23456/api/v1/deploy/logs/{deploymentId}
-```
+### 消息格式
 
-### 实例日志 WebSocket
-
-```
-ws://localhost:23456/api/v1/instance/{instanceId}/logs
-```
-
-**消息格式**:
+**客户端发送**:
 ```json
 {
-  "type": "log",
-  "timestamp": "2024-12-30T10:00:00Z",
-  "level": "INFO",
-  "message": "Bot started successfully",
-  "source": "maibot"
+  "type": "input",
+  "data": "ls -la\n"
+}
+```
+
+**服务端返回**:
+```json
+{
+  "type": "output",
+  "data": "terminal output..."
 }
 ```
 
@@ -454,41 +647,30 @@ API 使用标准的 HTTP 状态码：
 }
 ```
 
-## 📝 示例代码
+## 📝 简单示例
 
-### JavaScript
+### 获取实例列表 (JavaScript)
 
 ```javascript
-// 获取实例列表
 async function getInstances() {
   const response = await fetch('http://localhost:23456/api/v1/instances');
   const data = await response.json();
   return data.instances;
 }
-
-// 启动实例
-async function startInstance(instanceId) {
-  const response = await fetch(`http://localhost:23456/api/v1/instance/${instanceId}/start`, {
-    method: 'POST'
-  });
-  return await response.json();
-}
 ```
 
-### Python
+### 启动实例 (Python)
 
 ```python
 import requests
 
-# 获取实例列表
-def get_instances():
-    response = requests.get('http://localhost:23456/api/v1/instances')
-    return response.json()
-
-# 启动实例
 def start_instance(instance_id):
-    response = requests.post(f'http://localhost:23456/api/v1/instance/{instance_id}/start')
+    response = requests.get(f'http://localhost:23456/api/v1/instance/{instance_id}/start')
     return response.json()
 ```
 
-更多详细信息请参考后端项目中的 `backend_api.md` 文件。
+---
+
+> **提示**: 如需了解如何开发新的 API 或更详细的前端集成方法，请查看 [API 开发指南](./development.md)。
+
+> **参考**: 完整的后端 API 实现细节请参考后端项目中的 `backend_api.md` 文件。
