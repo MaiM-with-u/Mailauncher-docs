@@ -25,9 +25,17 @@ export default defineConfig({
           items: [
             { text: '快速开始', link: '/guide/' },
             { text: '安装配置', link: '/guide/installation' },
-            { text: '基本使用', link: '/guide/basic-usage' },
-            { text: '高级功能', link: '/guide/advanced' },
-            { text: '常见问题', link: '/guide/faq' }
+            { text: '基本使用', link: '/guide/basic-usage' }
+          ]
+        }
+      ],
+      '/api/': [
+        {
+          text: 'API 文档',
+          items: [
+            { text: 'API 概览', link: '/api/' },
+            { text: 'API 参考', link: '/api/reference' },
+            { text: '开发指南', link: '/api/development' }
           ]
         }
       ],
@@ -36,8 +44,8 @@ export default defineConfig({
           text: '开发文档',
           items: [
             { text: '开发概述', link: '/dev/' },
-            { text: '项目结构', link: '/dev/structure' },
-            { text: '构建部署', link: '/dev/build' },
+            { text: '项目架构', link: '/dev/architecture' },
+            { text: '部署指南', link: '/dev/deployment' },
             { text: '贡献指南', link: '/dev/contributing' },
             { text: 'GitHub Actions', link: '/dev/github-actions' }
           ]
@@ -49,17 +57,6 @@ export default defineConfig({
           ]
         }
       ],
-      '/api/': [
-        {
-          text: 'API 参考',
-          items: [
-            { text: 'API 概述', link: '/api/' },
-            { text: '启动器 API', link: '/api/launcher' },
-            { text: 'WebSocket API', link: '/api/websocket' },
-            { text: '配置 API', link: '/api/config' }
-          ]
-        }
-      ]
     },
 
     // 社交链接

@@ -24,6 +24,51 @@ MaiLauncher 是一个功能强大的 MaiBot 实例管理和部署工具，采用
 - **WebSocket**: 原生支持
 - **日志**: 结构化日志系统
 
+## 📚 文档导航
+
+### 🏗️ [项目架构](./architecture.md)
+了解 MaiLauncher 的整体系统架构、技术选型和设计理念：
+- 系统架构图
+- 技术栈详解
+- 模块设计
+- 数据流分析
+- 安全设计
+- 性能优化
+- 扩展性设计
+
+### 🚀 [部署指南](./deployment.md)
+完整的部署指南，覆盖从开发到生产的各种环境：
+- 开发环境部署
+- 生产环境部署
+- 容器化部署
+- 自动化部署
+- 监控和维护
+- 故障排除
+
+### 🤝 [贡献指南](./contributing.md)
+参与项目开发的完整指南：
+- 开发环境设置
+- 代码规范
+- 提交规范
+- Pull Request 流程
+- 问题报告
+- 文档贡献
+- 社区准则
+
+### 📱 [前端开发指南](./frontend-sendmessage.md)
+前端特定功能的开发说明：
+- 消息发送功能
+- 组件开发
+- 状态管理
+- API 集成
+
+### ⚙️ [CI/CD 配置](./github-actions.md)
+自动化构建和部署配置：
+- GitHub Actions 配置
+- 自动化测试
+- 构建流程
+- 部署流程
+
 ## 🏗️ 项目结构
 
 ### 前端项目结构
@@ -48,6 +93,359 @@ mailauncher/
 │   │   ├── toastService.js    # 通知服务
 │   │   └── theme.js           # 主题服务
 │   ├── stores/                # Pinia状态管理
+│   │   ├── instances.js       # 实例状态
+│   │   ├── downloads.js       # 下载状态
+│   │   ├── settings.js        # 设置状态
+│   │   └── chat.js           # 聊天状态
+│   ├── utils/                 # 工具函数
+│   │   ├── helpers.js         # 通用助手
+│   │   ├── validators.js      # 数据验证
+│   │   └── constants.js       # 常量定义
+│   ├── composables/           # Vue组合式函数
+│   │   ├── useInstances.js    # 实例管理
+│   │   ├── useWebSocket.js    # WebSocket管理
+│   │   └── useTheme.js        # 主题管理
+│   └── assets/                # 静态资源
+│       ├── styles/            # 样式文件
+│       ├── images/            # 图片资源
+│       └── icons/             # 图标资源
+├── src-tauri/                 # Tauri配置
+│   ├── src/                   # Rust源码
+│   ├── Cargo.toml            # Rust依赖
+│   └── tauri.conf.json       # Tauri配置
+├── public/                    # 公共资源
+├── package.json              # 项目配置
+├── vite.config.ts            # Vite配置
+├── tailwind.config.js        # Tailwind配置
+└── tsconfig.json             # TypeScript配置
+```
+
+### 后端项目结构
+
+```
+mailauncher-backend/
+├── main.py                    # 应用入口
+├── src/
+│   ├── modules/               # 功能模块
+│   │   ├── instance_api.py    # 实例管理API
+│   │   ├── deploy_api.py      # 部署管理API
+│   │   ├── system.py          # 系统监控API
+│   │   ├── maibot_api.py      # MaiBot资源API
+│   │   ├── messages_api.py    # 消息管理API
+│   │   └── websocket_manager.py # WebSocket管理
+│   ├── utils/                 # 工具类
+│   │   ├── database.py        # 数据库操作
+│   │   ├── database_model.py  # 数据模型
+│   │   ├── logger.py          # 日志管理
+│   │   ├── server.py          # 服务器配置
+│   │   └── config.py          # 配置管理
+│   └── tools/                 # 辅助工具
+│       └── deploy_version.py  # 部署版本管理
+├── data/                      # 数据目录
+│   └── MaiLauncher.db        # SQLite数据库
+├── logs/                      # 日志目录
+├── assets/                    # 静态资源
+├── requirements.txt           # Python依赖
+├── requirements-cross-platform.txt # 跨平台依赖
+└── version_info.txt          # 版本信息
+```
+
+## 🚀 快速开始
+
+### 1. 环境准备
+
+确保您的开发环境满足以下要求：
+
+- **Python 3.8+** - 后端开发
+- **Node.js 16+** - 前端开发
+- **Git** - 版本控制
+- **VSCode** - 推荐IDE（可选）
+
+### 2. 克隆项目
+
+```bash
+# 克隆前端项目
+git clone https://github.com/your-org/mailauncher.git
+cd mailauncher
+
+# 克隆后端项目
+git clone https://github.com/your-org/mailauncher-backend.git
+```
+
+### 3. 后端开发环境
+
+```bash
+cd mailauncher-backend
+
+# 创建虚拟环境
+python -m venv venv
+
+# 激活虚拟环境 (Windows)
+venv\Scripts\activate
+# 激活虚拟环境 (macOS/Linux)
+source venv/bin/activate
+
+# 安装依赖
+pip install -r requirements.txt
+
+# 初始化数据库
+python -c "from src.utils.database import init_database; init_database()"
+
+# 启动开发服务器
+python main.py
+```
+
+### 4. 前端开发环境
+
+```bash
+cd mailauncher
+
+# 安装依赖
+npm install
+# 或使用 pnpm (推荐)
+pnpm install
+
+# 启动开发服务器
+npm run dev
+# 或使用 pnpm
+pnpm dev
+```
+
+### 5. 验证安装
+
+- 后端服务: http://localhost:23456
+- 前端应用: http://localhost:5173
+- API 文档: http://localhost:23456/docs
+
+## 🔧 开发工具
+
+### 推荐的开发工具
+
+1. **代码编辑器**
+   - VSCode (推荐)
+   - PyCharm
+   - WebStorm
+
+2. **API 测试**
+   - Postman
+   - Insomnia
+   - curl
+
+3. **数据库管理**
+   - SQLite Browser
+   - DBeaver
+   - DataGrip
+
+4. **版本控制**
+   - Git
+   - GitHub Desktop
+   - SourceTree
+
+### VSCode 扩展推荐
+
+```json
+{
+  "recommendations": [
+    "ms-python.python",
+    "ms-python.black-formatter",
+    "vue.volar",
+    "bradlc.vscode-tailwindcss",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "ms-vscode.vscode-typescript-next"
+  ]
+}
+```
+
+## 📊 开发流程
+
+### 1. 功能开发流程
+
+```mermaid
+graph LR
+    A[需求分析] --> B[设计方案]
+    B --> C[创建分支]
+    C --> D[编写代码]
+    D --> E[单元测试]
+    E --> F[集成测试]
+    F --> G[代码审查]
+    G --> H[合并主分支]
+    H --> I[部署测试]
+```
+
+### 2. 代码质量保证
+
+- **代码规范**: 使用 Black (Python) 和 Prettier (JavaScript)
+- **静态分析**: 使用 flake8, mypy (Python) 和 ESLint (JavaScript)  
+- **单元测试**: pytest (Python) 和 Vitest (JavaScript)
+- **集成测试**: API 测试和端到端测试
+- **代码审查**: 所有代码都需要经过 Pull Request 审查
+
+### 3. 提交规范
+
+使用 [Conventional Commits](https://www.conventionalcommits.org/) 规范：
+
+```
+<type>(<scope>): <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+示例：
+```bash
+feat(backend): 添加实例批量操作 API
+fix(frontend): 修复实例状态显示问题
+docs: 更新 API 文档
+```
+
+## 🧪 测试策略
+
+### 后端测试
+
+```bash
+cd mailauncher-backend
+
+# 运行所有测试
+pytest
+
+# 运行特定测试文件
+pytest tests/test_instance_api.py
+
+# 运行带覆盖率的测试
+pytest --cov=src tests/
+
+# 运行性能测试
+pytest tests/performance/
+```
+
+### 前端测试
+
+```bash
+cd mailauncher
+
+# 运行单元测试
+pnpm test
+
+# 运行带覆盖率的测试
+pnpm test:coverage
+
+# 运行端到端测试
+pnpm test:e2e
+
+# 运行组件测试
+pnpm test:component
+```
+
+## 🐛 调试指南
+
+### 后端调试
+
+1. **使用 Python 调试器**
+```python
+import pdb; pdb.set_trace()  # 设置断点
+```
+
+2. **查看日志**
+```bash
+tail -f logs/mailauncher.log
+```
+
+3. **使用 FastAPI 调试模式**
+```python
+# main.py
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=23456, reload=True, debug=True)
+```
+
+### 前端调试
+
+1. **浏览器开发者工具**
+   - Console 查看日志
+   - Network 查看API请求
+   - Vue DevTools 查看组件状态
+
+2. **Vite 热重载**
+   - 代码更改自动刷新
+   - 保持应用状态
+
+3. **调试配置**
+```javascript
+// vite.config.js
+export default {
+  define: {
+    __VUE_OPTIONS_API__: true,
+    __VUE_PROD_DEVTOOLS__: true
+  }
+}
+```
+
+## 📈 性能优化
+
+### 后端性能
+
+- **异步处理**: 使用 async/await
+- **数据库优化**: 索引和查询优化
+- **缓存策略**: 内存缓存关键数据
+- **并发控制**: 限制并发请求数
+
+### 前端性能
+
+- **代码分割**: 按路由分割代码
+- **懒加载**: 组件和图片懒加载
+- **虚拟滚动**: 大列表优化
+- **缓存策略**: API 响应缓存
+
+## 🔐 安全考虑
+
+### 后端安全
+
+- **输入验证**: 严格验证所有输入
+- **SQL 注入防护**: 使用参数化查询
+- **文件访问控制**: 限制文件访问权限
+- **进程隔离**: 实例进程隔离
+
+### 前端安全
+
+- **XSS 防护**: 输出转义
+- **CSRF 防护**: 使用 CSRF 令牌
+- **内容安全策略**: CSP 头部配置
+- **依赖安全**: 定期更新依赖
+
+## 📞 获取帮助
+
+如果您在开发过程中遇到问题，可以通过以下方式获取帮助：
+
+1. **查看文档**: 首先查看相关文档
+2. **搜索 Issues**: 在 GitHub 上搜索类似问题
+3. **创建 Issue**: 描述问题并提供复现步骤
+4. **社区讨论**: 参与社区讨论
+5. **联系维护者**: 直接联系项目维护者
+
+## 🎯 路线图
+
+### 近期目标 (v1.1)
+- [ ] 实例模板系统
+- [ ] 插件管理器
+- [ ] 性能监控面板
+- [ ] 多语言支持
+
+### 中期目标 (v1.5)
+- [ ] 集群管理
+- [ ] 自动扩缩容
+- [ ] 高级监控
+- [ ] API 认证
+
+### 长期目标 (v2.0)
+- [ ] 微服务架构
+- [ ] 云原生部署
+- [ ] 企业级功能
+- [ ] 第三方集成
+
+---
+
+感谢您对 MaiLauncher 项目的关注！如果您有任何建议或想法，欢迎通过 GitHub Issues 或 Pull Requests 与我们分享。
 │   │   ├── instanceStore.js   # 实例状态
 │   │   ├── deployStore.js     # 部署状态
 │   │   └── systemStore.js     # 系统状态
