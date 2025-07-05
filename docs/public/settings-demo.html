@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MaiLauncher 设置组件库演示</title>
+    <!-- DaisyUI + Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.24/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Iconify -->
+    <script src="https://code.iconify.design/3/3.1.1/iconify.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .component-demo {
+            background: hsl(var(--b1));
+            border: 1px solid hsl(var(--b3));
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .demo-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: hsl(var(--bc));
+        }
+        .demo-description {
+            color: hsl(var(--bc)/0.6);
+            margin-bottom: 1.5rem;
+        }
+        .settings-value-display {
+            background: hsl(var(--b2));
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: monospace;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="demo-container">
+            <!-- 页面标题 -->
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-primary mb-2">MaiLauncher 设置组件库</h1>
+                <p class="text-lg text-base-content/70">模块化、响应式的设置界面组件演示</p>
+            </div>
+
+            <!-- 主题切换 -->
+            <div class="component-demo">
+                <h2 class="demo-title">主题选择器</h2>
+                <p class="demo-description">演示主题切换功能，支持明亮、暗黑和跟随系统模式</p>
+                
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">主题模式</span>
+                    </label>
+                    <div class="flex gap-4">
+                        <label v-for="theme in themes" :key="theme.value" class="label cursor-pointer">
+                            <input 
+                                type="radio" 
+                                :value="theme.value" 
+                                v-model="currentTheme" 
+                                class="radio radio-primary" 
+                                @change="changeTheme"
+                            />
+                            <iconify-icon :icon="theme.icon" class="ml-2"></iconify-icon>
+                            <span class="label-text ml-1">{{ theme.label }}</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 基础设置组 -->
+            <div class="component-demo">
+                <h2 class="demo-title">基础设置组</h2>
+                <p class="demo-description">展示常用的设置控件：开关、滑块、下拉选择和输入框</p>
+                
+                <div class="space-y-6">
+                    <!-- 开关控件 -->
+                    <div class="form-control">
+                        <label class="label cursor-pointer">
+                            <div>
+                                <span class="label-text">自动启动</span>
+                                <div class="text-xs text-base-content/60">开机时自动启动应用</div>
+                            </div>
+                            <input type="checkbox" v-model="settings.autoStart" class="toggle toggle-primary" />
+                        </label>
+                    </div>
+
+                    <!-- 滑块控件 -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">界面缩放: {{ settings.zoom }}%</span>
+                        </label>
+                        <input 
+                            type="range" 
+                            min="75" 
+                            max="150" 
+                            step="5"
+                            v-model="settings.zoom" 
+                            class="range range-primary" 
+                        />
+                        <div class="w-full flex justify-between text-xs px-2">
+                            <span>75%</span>
+                            <span>100%</span>
+                            <span>125%</span>
+                            <span>150%</span>
+                        </div>
+                    </div>
+
+                    <!-- 下拉选择 -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">界面语言</span>
+                        </label>
+                        <select v-model="settings.language" class="select select-bordered">
+                            <option v-for="lang in languages" :key="lang.value" :value="lang.value">
+                                {{ lang.flag }} {{ lang.label }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- 输入框 -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">服务端口</span>
+                        </label>
+                        <div class="flex gap-2">
+                            <input 
+                                type="number" 
+                                v-model="settings.port" 
+                                min="1000" 
+                                max="65535"
+                                class="input input-bordered flex-1" 
+                                placeholder="8080" 
+                            />
+                            <button 
+                                class="btn btn-outline" 
+                                @click="testConnection"
+                                :class="{ 'loading': testing }"
+                            >
+                                <iconify-icon icon="mdi:connection" v-if="!testing"></iconify-icon>
+                                测试连接
+                            </button>
+                        </div>
+                        <div v-if="connectionStatus" class="label">
+                            <span class="label-text-alt" :class="connectionStatus.success ? 'text-success' : 'text-error'">
+                                <iconify-icon :icon="connectionStatus.success ? 'mdi:check-circle' : 'mdi:alert-circle'"></iconify-icon>
+                                {{ connectionStatus.message }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 高级功能演示 -->
+            <div class="component-demo">
+                <h2 class="demo-title">高级功能</h2>
+                <p class="demo-description">展示路径选择、配置导入导出等高级功能</p>
+                
+                <div class="space-y-6">
+                    <!-- 路径选择 -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">数据目录</span>
+                        </label>
+                        <div class="flex gap-2">
+                            <input 
+                                type="text" 
+                                v-model="settings.dataPath" 
+                                class="input input-bordered flex-1" 
+                                placeholder="请选择数据存储目录" 
+                                readonly
+                            />
+                            <button class="btn btn-outline" @click="selectPath">
+                                <iconify-icon icon="mdi:folder-open"></iconify-icon>
+                                浏览
+                            </button>
+                            <button class="btn btn-ghost" @click="settings.dataPath = ''" v-if="settings.dataPath">
+                                <iconify-icon icon="mdi:close"></iconify-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 配置操作 -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">配置管理</span>
+                        </label>
+                        <div class="flex gap-2">
+                            <button class="btn btn-primary" @click="saveSettings">
+                                <iconify-icon icon="mdi:content-save"></iconify-icon>
+                                保存配置
+                            </button>
+                            <button class="btn btn-outline" @click="exportSettings">
+                                <iconify-icon icon="mdi:export"></iconify-icon>
+                                导出配置
+                            </button>
+                            <button class="btn btn-outline" @click="importSettings">
+                                <iconify-icon icon="mdi:import"></iconify-icon>
+                                导入配置
+                            </button>
+                            <button class="btn btn-ghost" @click="resetSettings">
+                                <iconify-icon icon="mdi:restore"></iconify-icon>
+                                重置
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 当前设置值显示 -->
+            <div class="component-demo">
+                <h2 class="demo-title">当前设置值</h2>
+                <p class="demo-description">实时显示当前所有设置的值，演示数据绑定效果</p>
+                
+                <div class="settings-value-display">
+                    <pre>{{ JSON.stringify(settings, null, 2) }}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, reactive, watch } = Vue
+
+        createApp({
+            setup() {
+                // 主题配置
+                const themes = [
+                    { value: 'light', label: '明亮', icon: 'mdi:white-balance-sunny' },
+                    { value: 'dark', label: '暗黑', icon: 'mdi:weather-night' },
+                    { value: 'auto', label: '跟随系统', icon: 'mdi:theme-light-dark' }
+                ]
+
+                // 语言配置
+                const languages = [
+                    { value: 'zh-CN', label: '简体中文', flag: '🇨🇳' },
+                    { value: 'en-US', label: 'English', flag: '🇺🇸' },
+                    { value: 'ja-JP', label: '日本語', flag: '🇯🇵' }
+                ]
+
+                // 当前主题
+                const currentTheme = ref('light')
+
+                // 设置数据
+                const settings = reactive({
+                    autoStart: false,
+                    zoom: 100,
+                    language: 'zh-CN',
+                    port: 8080,
+                    dataPath: ''
+                })
+
+                // 连接测试状态
+                const testing = ref(false)
+                const connectionStatus = ref(null)
+
+                // 主题切换
+                const changeTheme = () => {
+                    document.documentElement.setAttribute('data-theme', currentTheme.value)
+                }
+
+                // 测试连接
+                const testConnection = async () => {
+                    testing.value = true
+                    connectionStatus.value = null
+                    
+                    setTimeout(() => {
+                        testing.value = false
+                        connectionStatus.value = {
+                            success: Math.random() > 0.5,
+                            message: Math.random() > 0.5 ? '连接成功' : '连接失败，请检查端口设置'
+                        }
+                    }, 1500)
+                }
+
+                // 选择路径
+                const selectPath = () => {
+                    // 模拟路径选择
+                    settings.dataPath = `/Users/用户名/MaiLauncher/data_${Date.now()}`
+                }
+
+                // 保存设置
+                const saveSettings = () => {
+                    localStorage.setItem('mailauncher-settings', JSON.stringify(settings))
+                    alert('设置已保存！')
+                }
+
+                // 导出设置
+                const exportSettings = () => {
+                    const dataStr = JSON.stringify(settings, null, 2)
+                    const dataBlob = new Blob([dataStr], { type: 'application/json' })
+                    const url = URL.createObjectURL(dataBlob)
+                    
+                    const link = document.createElement('a')
+                    link.href = url
+                    link.download = 'mailauncher-settings.json'
+                    link.click()
+                    
+                    URL.revokeObjectURL(url)
+                }
+
+                // 导入设置
+                const importSettings = () => {
+                    const input = document.createElement('input')
+                    input.type = 'file'
+                    input.accept = '.json'
+                    input.onchange = (e) => {
+                        const file = e.target.files[0]
+                        if (file) {
+                            const reader = new FileReader()
+                            reader.onload = (e) => {
+                                try {
+                                    const imported = JSON.parse(e.target.result)
+                                    Object.assign(settings, imported)
+                                    alert('设置导入成功！')
+                                } catch (error) {
+                                    alert('导入失败：文件格式错误')
+                                }
+                            }
+                            reader.readAsText(file)
+                        }
+                    }
+                    input.click()
+                }
+
+                // 重置设置
+                const resetSettings = () => {
+                    if (confirm('确定要重置所有设置吗？')) {
+                        Object.assign(settings, {
+                            autoStart: false,
+                            zoom: 100,
+                            language: 'zh-CN',
+                            port: 8080,
+                            dataPath: ''
+                        })
+                        currentTheme.value = 'light'
+                        changeTheme()
+                    }
+                }
+
+                // 监听设置变化
+                watch(settings, (newSettings) => {
+                    console.log('设置已更新:', newSettings)
+                }, { deep: true })
+
+                // 初始化主题
+                changeTheme()
+
+                return {
+                    themes,
+                    languages,
+                    currentTheme,
+                    settings,
+                    testing,
+                    connectionStatus,
+                    changeTheme,
+                    testConnection,
+                    selectPath,
+                    saveSettings,
+                    exportSettings,
+                    importSettings,
+                    resetSettings
+                }
+            }
+        }).mount('#app')
+    </script>
+</body>
+</html>

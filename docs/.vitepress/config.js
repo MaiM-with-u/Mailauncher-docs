@@ -53,7 +53,8 @@ export default defineConfig({
         {
           text: '前端开发',
           items: [
-            { text: 'send_message 实现', link: '/dev/frontend-sendmessage' }
+            { text: 'send_message 实现', link: '/dev/frontend-sendmessage' },
+            { text: '设置组件库', link: '/dev/settings-components' }
           ]
         }
       ],

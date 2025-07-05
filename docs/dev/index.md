@@ -62,6 +62,14 @@ MaiLauncher 是一个功能强大的 MaiBot 实例管理和部署工具，采用
 - 状态管理
 - API 集成
 
+### 🎨 [设置组件库](./settings-components.md)
+模块化的设置界面组件库文档：
+- 基础组件使用
+- 专用表单组件
+- 预构建面板
+- 组件开发指南
+- 最佳实践
+
 ### ⚙️ [CI/CD 配置](./github-actions.md)
 自动化构建和部署配置：
 - GitHub Actions 配置
